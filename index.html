@@ -1,0 +1,32 @@
+<html>
+    <body style="margin:0">
+        <canvas id="canvas" style="width:100%; height:100%"></canvas>
+        <p style="display:float;position:fixed;bottom:0;left:0;background-color:#AAAAAA;">Original Mandelbrot Shader by I&ntilde;igo Quilez: <a href="https://www.shadertoy.com/view/lsX3W4">https://www.shadertoy.com/view/lsX3W4</a></br>
+        <a href="https://github.com/jonvaldes/canvascripten">Source code for this project here</a></p>
+    </body>
+    <script src="a.out.js"></script>
+    <script>
+        var start = Date.now();
+        var c = document.getElementById("canvas");
+        var w = window.innerWidth>>1;
+        var h = window.innerHeight>>1;
+        c.width = w;
+        c.height = h;
+
+        var ctx = c.getContext('2d');
+        var imageData = ctx.getImageData(0,0,w,h);
+        var bufSize = w * h * 4;
+        var bufPtr = Module._malloc(bufSize);
+        var buf = new Uint8Array(Module.HEAPU8.buffer, bufPtr, bufSize);
+        
+        var wrappedPaint=Module.cwrap('paint','void',['number','number','number','number']);
+
+        var repaint = function(){
+            wrappedPaint(buf.byteOffset, w, h, Date.now() - start );
+            imageData.data.set(buf);
+            ctx.putImageData(imageData,0,0);
+            window.requestAnimationFrame(repaint);
+        };
+        repaint();
+    </script>
+</html>
